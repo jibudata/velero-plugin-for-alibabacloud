@@ -20,12 +20,19 @@ PKG := github.com/heptio/velero-plugin-example
 
 BUILD_IMAGE ?= golang:1.12-stretch
 
+VERSION := v1.3
+JIBU_BIN ?= velero-plugin-alibabacloud
+IMAGE_PREFIX ?= registry.cn-shanghai.aliyuncs.com/jibutech
+IMAGE_TAG:=$(shell ./hack/image-tag)
+JIBU_VERSION ?= v1.2.1-$(IMAGE_TAG)
+JIBU_IMAGE ?= $(IMAGE_PREFIX)/$(JIBU_BIN):$(JIBU_VERSION)
+
 IMAGE ?= gcr.io/heptio-images/velero-plugin-example
 
 # Which architecture to build - see $(ALL_ARCH) for options.
 # if the 'local' rule is being run, detect the ARCH from 'go env'
 # if it wasn't specified by the caller.
-local : ARCH ?= $(shell go env GOOS)-$(shell go env GOARCH)
+#local : ARCH ?= $(shell go env GOOS)-$(shell go env GOARCH)
 ARCH ?= linux-amd64
 
 platform_temp = $(subst -, ,$(ARCH))
@@ -84,6 +91,10 @@ build-dirs:
 container: all
 	cp Dockerfile _output/bin/$(GOOS)/$(GOARCH)/Dockerfile
 	docker build -t $(IMAGE) -f _output/bin/$(GOOS)/$(GOARCH)/Dockerfile _output/bin/$(GOOS)/$(GOARCH)
+
+image:
+	docker build --build-arg TARGETOS=$(GOOS) --build-arg TARGETARCH=$(GOARCH) --build-arg BIN=$(JIBU_BIN) -f Dockerfile.jibu -t $(JIBU_IMAGE) .
+	docker push $(JIBU_IMAGE)
 
 all-ci: $(addprefix ci-, $(BIN))
 

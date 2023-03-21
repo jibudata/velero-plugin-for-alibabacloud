@@ -25,6 +25,7 @@ const (
 	networkTypeConfigKey     = "network"
 	networkTypeAccelerate    = "accelerate"
 	networkTypeInternal      = "internal"
+    credentialsFileKey = "credentialsFile"
 )
 
 // RoleAuth define STS Token Response
@@ -49,6 +50,26 @@ func loadEnv() error {
 	}
 
 	return nil
+}
+
+func loadCredEnvs(config map[string]string) (map[string]string, error) {
+
+    credFileName := config[credentialsFileKey]
+    if credFileName != "" {
+		return nil, errors.Errorf("credentialsFileKey is empty (%s)", credFileName)
+    }
+
+	credFile := os.Getenv(credFileName)
+	if credFile == "" {
+        return nil, errors.Errorf("wrong credential file: (%s)", credFile)
+	}
+
+	credEnv, err := godotenv.Read(credFile)
+    if err != nil {
+		return nil, errors.Wrapf(err, "error loading environment from credential file (%s)", credFile)
+	}
+
+    return credEnv, nil
 }
 
 // get region or available zone information
