@@ -55,18 +55,13 @@ func loadEnv() error {
 func loadCredEnvs(config map[string]string) (map[string]string, error) {
 
     credFileName := config[credentialsFileKey]
-    if credFileName != "" {
+    if credFileName == "" {
 		return nil, errors.Errorf("credentialsFileKey is empty (%s)", credFileName)
     }
 
-	credFile := os.Getenv(credFileName)
-	if credFile == "" {
-        return nil, errors.Errorf("wrong credential file: (%s)", credFile)
-	}
-
-	credEnv, err := godotenv.Read(credFile)
+	credEnv, err := godotenv.Read(credFileName)
     if err != nil {
-		return nil, errors.Wrapf(err, "error loading environment from credential file (%s)", credFile)
+		return nil, errors.Wrapf(err, "error loading environment from credential file (%s)", credFileName)
 	}
 
     return credEnv, nil

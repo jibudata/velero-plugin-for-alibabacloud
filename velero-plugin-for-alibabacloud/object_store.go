@@ -137,16 +137,11 @@ func (o *ObjectStore) Init(config map[string]string) error {
 		}
 
 	} else {
-		if err := loadEnv(); err != nil {
-			return err
-		}
         credEnv, err := loadCredEnvs(config)
         if err != nil {
             return errors.Errorf("error loading credential keys: %v", err)
         }
 
-		//accessKeyID = os.Getenv("ALIBABA_CLOUD_ACCESS_KEY_ID")
-		//accessKeySecret = os.Getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET")
 		accessKeyID = credEnv["ALIBABA_CLOUD_ACCESS_KEY_ID"]
 		accessKeySecret = credEnv["ALIBABA_CLOUD_ACCESS_KEY_SECRET"]
 		stsToken = os.Getenv("ALIBABA_CLOUD_ACCESS_STS_TOKEN")
