@@ -1,0 +1,29 @@
+FROM golang:1.17.13 as builder
+ARG TARGETOS
+ARG TARGETARCH
+ARG GOPROXY=https://goproxy.cn,direct
+
+ENV CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH}
+
+WORKDIR /
+
+COPY go.mod go.sum ./
+
+# Get dependencies - will also be cached if we won't change mod/sum
+RUN go mod download
+
+COPY vendor vendor
+COPY velero-plugin-for-alibabacloud velero-plugin-for-alibabacloud
+
+
+RUN	go build -v -o _output/${BIN} ./velero-plugin-for-alibabacloud/*
+
+
+FROM ubuntu:bionic
+
+WORKDIR /
+RUN mkdir /plugins
+COPY --from=builder _output/${BIN} /plugins/
+
+USER nobody:nobody
+ENTRYPOINT ["/bin/bash", "-c", "cp /plugins/* /target/."]

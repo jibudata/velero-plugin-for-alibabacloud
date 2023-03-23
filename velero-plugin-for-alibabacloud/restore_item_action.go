@@ -15,7 +15,6 @@ type RestoreItemAction struct {
 	log logrus.FieldLogger
 }
 
-//
 func newRestoreItemAction(logger logrus.FieldLogger) *RestoreItemAction {
 	return &RestoreItemAction{log: logger}
 }

@@ -79,7 +79,7 @@ func newObjectStore(logger logrus.FieldLogger) *ObjectStore {
 
 func (o *ObjectStore) getBucket(bucket string) (ossBucket, error) {
 	var err error
-	o.client, err = updateOssClient(o.ramRole, o. endpoint, o.client)
+	o.client, err = updateOssClient(o.ramRole, o.endpoint, o.client)
 	if err != nil {
 		o.log.Errorf("failed to update OSS Client: %v", err)
 	}
@@ -92,7 +92,11 @@ func (o *ObjectStore) getBucket(bucket string) (ossBucket, error) {
 
 // Init init oss client with os envs
 func (o *ObjectStore) Init(config map[string]string) error {
-	if err := veleroplugin.ValidateObjectStoreConfigKeys(config, regionConfigKey, networkTypeConfigKey); err != nil {
+	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
+		regionConfigKey,
+		networkTypeConfigKey,
+		credentialsFileKey,
+	); err != nil {
 		return err
 	}
 
@@ -133,11 +137,13 @@ func (o *ObjectStore) Init(config map[string]string) error {
 		}
 
 	} else {
-		if err := loadEnv(); err != nil {
-			return err
+		credEnv, err := loadCredEnvs(config)
+		if err != nil {
+			return errors.Errorf("error loading credential keys: %v", err)
 		}
-		accessKeyID = os.Getenv("ALIBABA_CLOUD_ACCESS_KEY_ID")
-		accessKeySecret = os.Getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET")
+
+		accessKeyID = credEnv["ALIBABA_CLOUD_ACCESS_KEY_ID"]
+		accessKeySecret = credEnv["ALIBABA_CLOUD_ACCESS_KEY_SECRET"]
 		stsToken = os.Getenv("ALIBABA_CLOUD_ACCESS_STS_TOKEN")
 		encryptionKeyID = os.Getenv("ALIBABA_CLOUD_ENCRYPTION_KEY_ID")
 		if len(accessKeyID) == 0 {
