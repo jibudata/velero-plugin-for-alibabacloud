@@ -16,7 +16,7 @@
 BIN ?= $(wildcard velero-*)
 
 # This repo's root import path (under GOPATH).
-PKG := github.com/heptio/velero-plugin-example
+PKG := github.com/vmware-tanzu/velero-plugin-example
 
 BUILD_IMAGE ?= golang:1.12-stretch
 
@@ -28,6 +28,13 @@ JIBU_VERSION ?= v1.2.1-$(IMAGE_TAG)
 JIBU_IMAGE ?= $(IMAGE_PREFIX)/$(JIBU_BIN):$(JIBU_VERSION)
 
 IMAGE ?= gcr.io/heptio-images/velero-plugin-example
+
+GIT_SHA = $(shell git rev-parse HEAD)
+ifneq ($(shell git status --porcelain 2> /dev/null),)
+	GIT_TREE_STATE ?= dirty
+else
+	GIT_TREE_STATE ?= clean
+endif
 
 # Which architecture to build - see $(ALL_ARCH) for options.
 # if the 'local' rule is being run, detect the ARCH from 'go env'
@@ -95,6 +102,20 @@ container: all
 image:
 	docker build --build-arg TARGETOS=$(GOOS) --build-arg TARGETARCH=$(GOARCH) --build-arg BIN=$(JIBU_BIN) -f Dockerfile.jibu -t $(JIBU_IMAGE) .
 	docker push $(JIBU_IMAGE)
+
+plugin.image:
+	docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile.plugin -t $(JIBU_IMAGE) .
+
+plugin.push:
+	docker buildx build --platform linux/amd64,linux/arm64 \
+		--build-arg=PKG=$(PKG) \
+        --build-arg=BIN=$(BIN) \
+        --build-arg=VERSION=$(JIBU_VERSION) \
+        --build-arg=GIT_SHA=$(GIT_SHA) \
+        --build-arg=GIT_TREE_STATE=$(GIT_TREE_STATE) \
+        --build-arg=REGISTRY=$(IMAGE_PREFIX) \
+		-f Dockerfile.plugin -t $(JIBU_IMAGE) --push .
+
 
 all-ci: $(addprefix ci-, $(BIN))
 
