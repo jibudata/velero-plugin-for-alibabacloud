@@ -25,7 +25,7 @@ const (
 	networkTypeConfigKey     = "network"
 	networkTypeAccelerate    = "accelerate"
 	networkTypeInternal      = "internal"
-    credentialsFileKey = "credentialsFile"
+	credentialsFileKey       = "credentialsFile"
 )
 
 // RoleAuth define STS Token Response
@@ -54,17 +54,17 @@ func loadEnv() error {
 
 func loadCredEnvs(config map[string]string) (map[string]string, error) {
 
-    credFileName := config[credentialsFileKey]
-    if credFileName == "" {
+	credFileName := config[credentialsFileKey]
+	if credFileName == "" {
 		return nil, errors.Errorf("credentialsFileKey is empty (%s)", credFileName)
-    }
+	}
 
 	credEnv, err := godotenv.Read(credFileName)
-    if err != nil {
+	if err != nil {
 		return nil, errors.Wrapf(err, "error loading environment from credential file (%s)", credFileName)
 	}
 
-    return credEnv, nil
+	return credEnv, nil
 }
 
 // get region or available zone information
@@ -138,7 +138,7 @@ func getEcsRegionID(config map[string]string) string {
 }
 
 // getRamRole return ramrole name
-func getRamRole () (string, error) {
+func getRamRole() (string, error) {
 	subpath := "ram/security-credentials/"
 	roleName, err := GetMetaData(subpath)
 	if err != nil {
@@ -147,7 +147,7 @@ func getRamRole () (string, error) {
 	return roleName, nil
 }
 
-//getSTSAK return AccessKeyID, AccessKeySecret and SecurityToken
+// getSTSAK return AccessKeyID, AccessKeySecret and SecurityToken
 func getSTSAK(ramrole string) (string, string, string, error) {
 	// AliyunCSVeleroRole
 	roleAuth := RoleAuth{}
@@ -164,7 +164,7 @@ func getSTSAK(ramrole string) (string, string, string, error) {
 	return roleAuth.AccessKeyID, roleAuth.AccessKeySecret, roleAuth.SecurityToken, nil
 }
 
-//GetMetaData get metadata from ecs meta-server
+// GetMetaData get metadata from ecs meta-server
 func GetMetaData(resource string) (string, error) {
 	resp, err := http.Get(metadataURL + resource)
 	if err != nil {
