@@ -22,10 +22,12 @@ import (
 )
 
 func main() {
+
+	// NOTE: ys1000 only requires oss support with its own csi backup
 	veleroplugin.NewServer().
 		RegisterObjectStore("velero.io/alibabacloud", newAlibabaCloudObjectStore).
-		RegisterVolumeSnapshotter("velero.io/alibabacloud", newAlibabaCloudVolumeSnapshotter).
-		RegisterRestoreItemAction("velero.io/alibabacloud", newAlibabaCloudRestoreItemAction).
+		//RegisterVolumeSnapshotter("velero.io/alibabacloud", newAlibabaCloudVolumeSnapshotter).
+		//RegisterRestoreItemAction("velero.io/alibabacloud", newAlibabaCloudRestoreItemAction).
 		Serve()
 }
 

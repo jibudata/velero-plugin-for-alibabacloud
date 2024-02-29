@@ -22,7 +22,7 @@ BUILD_IMAGE ?= golang:1.12-stretch
 
 VERSION := v1.3
 JIBU_BIN ?= velero-plugin-alibabacloud
-IMAGE_PREFIX ?= registry.cn-shanghai.aliyuncs.com/jibutech
+IMAGE_PREFIX ?= jibutech-registry.cn-hangzhou.cr.aliyuncs.com/ys1000
 IMAGE_TAG:=$(shell ./hack/image-tag)
 JIBU_VERSION ?= v1.2.1-$(IMAGE_TAG)
 JIBU_IMAGE ?= $(IMAGE_PREFIX)/$(JIBU_BIN):$(JIBU_VERSION)
